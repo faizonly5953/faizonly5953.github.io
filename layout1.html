@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>FAIZBP</title>
+	<link rel="stylesheet" href="layout1.css">
+</head>
+<body>
+	<a id="Button" href="index.html" style="--clr:#1e9bff"><span>CHANGE LAYOUT</span><i></i></a>
+	<ul>
+		<span id="marker"></span>
+		<li><a href="mediasosial.html" target="blank">Media Sosial</a></li>
+		<li><a href="team.html" target="blank">Team</a></li>
+	</ul>
+	<script>
+		let marker = document.querySelector('#marker');
+		let item = document.querySelectorAll('ul li a');
+
+		function Indicator(e){
+			marker.style.top = e.offsetTop+'px';
+			marker.style.width = e.offsetWidth+'px';
+		}
+
+		item.forEach(link =>{
+			link.addEventListener('mousemove',(e) => {
+				Indicator(e.target);
+			})
+		})
+	</script>
+</body>
+</html>
