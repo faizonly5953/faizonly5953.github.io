@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>Anime Information</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        #animeList {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
+
+        hr {
+            border: 1px solid #ddd;
+        }
+
+        #pagination {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 8px;
+            margin: 0 5px;
+            cursor: pointer;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        #searchContainer,
+        /* Gaya CSS yang ada sebelumnya (tidak berubah) */
+
+        #filterContainer {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Media query untuk resolusi kurang dari atau sama dengan 600px */
+        @media (max-width: 600px) {
+            #filterContainer {
+                flex-direction: column;
+                /* Mengubah arah flex menjadi kolom */
+                align-items: center;
+                /* Menetapkan posisi item ke tengah */
+            }
+
+            #sfwCheckbox {
+                margin-bottom: 10px;
+                /* Memberikan jarak antara Safe For Work checkbox dan elemen lainnya */
+            }
+
+            label {
+                margin-bottom: 5px;
+                /* Memberikan jarak antara label dan elemen input pada resolusi kecil */
+            }
+
+            input,
+            select {
+                width: 100%;
+                /* Membuat elemen input dan select mengisi lebar kontainer */
+            }
+        }
+
+
+        #searchInput,
+        #animeType,
+        #startDate,
+        #endDate {
+            padding: 8px;
+            margin-right: 10px;
+            width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+
+        #sfwCheckbox {
+            display: flex;
+            align-items: center;
+        }
+
+        label {
+            margin-right: 10px;
+            color: #333;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 5px;
+        }
+
+        input[type="text"],
+        input[type="date"] {
+            padding: 8px;
+            margin-right: 10px;
+            width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+
+        #sfwCheckbox label {
+            margin-left: 5px;
+            color: #333;
+        }
+
+        /* Pembaruan pada CSS */
+        #animeType {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            box-sizing: border-box;
+            width: 120px;
+        }
+
+        /* Gaya untuk dropdown arrow */
+        #animeType:after {
+            content: '\25BC';
+            /* Unicode karakter untuk panah bawah */
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+        }
+    </style>
+</head>
+
+<body>
+
+    <a href="random.html" class="btn btn-outline-dark" style="position: absolute; top: 10px; left: 10px;">Random Anime</a>
+
+
+    <div id="searchContainer">
+        <input type="text" id="searchInput" placeholder="Search anime...">
+        <button type="button" class="btn btn-outline-dark" onclick="searchAnime()">Search</button>
+    </div>
+
+    <!-- Pembaruan pada HTML -->
+    <div id="filterContainer">
+        <div id="sfwCheckbox">
+            <input type="checkbox" id="sfwCheckbox">
+            <label for="sfwCheckbox">Safe For Work</label>
+        </div>
+
+        <label for="animeType">Anime Type:</label>
+        <select id="animeType">
+            <option value="">-- All --</option>
+            <option value="tv">TV</option>
+            <option value="movie">Movie</option>
+            <option value="ova">OVA</option>
+            <option value="special">Special</option>
+            <option value="ona">ONA</option>
+            <option value="music">Music</option>
+        </select>
+
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate">
+
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate">
+    </div>
+
+    <div id="animeList"></div>
+    <div id="pagination"></div>
+
+    <script>
+        // Variables to keep track of pagination, search, and filters
+        let currentPage = 1;
+        const itemsPerPage = 5;
+
+        // Function to fetch data from the API
+        async function fetchData(page, query, sfw, animeType, startDate, endDate) {
+            try {
+                let url = `https://api.jikan.moe/v4/anime?page=${page}`;
+
+                // Adding search query if available
+                if (query) {
+                    url += `&q=${query}`;
+                }
+
+                // Adding filters
+                if (sfw) {
+                    url += `&sfw`;
+                }
+
+                if (animeType) {
+                    url += `&type=${animeType}`;
+                }
+
+                if (startDate) {
+                    url += `&start_date=${startDate}`;
+                }
+
+                if (endDate) {
+                    url += `&end_date=${endDate}`;
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+                displayAnime(data);
+                displayPagination(data.pagination);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Function to search for anime
+        function searchAnime() {
+            const searchInput = document.getElementById('searchInput');
+            const sfwCheckbox = document.getElementById('sfwCheckbox');
+            const animeTypeInput = document.getElementById('animeType');
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+
+            const query = searchInput.value.trim();
+            const sfw = sfwCheckbox.checked;
+            const animeType = animeTypeInput.value.trim();
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+
+            currentPage = 1;
+            fetchData(currentPage, query, sfw, animeType, startDate, endDate);
+        }
+
+        // Function to display anime information
+// Function to display anime information
+function displayAnime(data) {
+  const animeListContainer = document.getElementById('animeList');
+  animeListContainer.innerHTML = ''; // Clear previous content
+
+  const animeData = data.data;
+
+  animeData.forEach(anime => {
+    // Fetch trailer link from the anime data
+    const trailerLink = anime.trailer && anime.trailer.url
+      ? `<a href="${anime.trailer.url}" target="_blank">Watch Trailer</a>`
+      : 'Not Available';
+
+    const animeElement = document.createElement('div');
+    animeElement.innerHTML = `
+      <h1>${anime.title ?? 'Unknown'}</h1>
+      <p><strong>Type:</strong> ${anime.type ?? 'Unknown'}</p>
+      <p><strong>Status:</strong> ${anime.status ?? 'Unknown'}</p>
+      <p><strong>Episodes:</strong> ${anime.episodes ?? 'Unknown'}</p>
+      <p><strong>Air Date:</strong> ${anime.aired?.string ?? 'Unknown'}</p>
+      <p><strong>Duration:</strong> ${anime.duration ?? 'Unknown'}</p>
+      <p><strong>Rating:</strong> ${anime.rating ?? 'Unknown'}</p>
+      <p><strong>Score:</strong> ${anime.score ?? 'Unknown'}</p>
+      <p><strong>Genres:</strong> ${anime.genres?.map(genre => genre.name).join(', ') ?? 'Unknown'}</p>
+
+      <img src="${anime.images.jpg.large_image_url}" alt="${anime.title}">
+
+      <p><strong>Synopsis:</strong> ${anime.synopsis ?? 'Unknown'}</p>
+      <p><strong>Trailer:</strong> ${trailerLink}</p> <!-- Include the trailer link here -->
+      <hr>
+    `;
+    animeListContainer.appendChild(animeElement);
+  });
+}
+
+
+        // Function to display pagination
+        function displayPagination(pagination) {
+            const paginationContainer = document.getElementById('pagination');
+            const lastPage = pagination.last_visible_page;
+
+            // Previous Page Button
+            const prevButton = document.createElement('button');
+            prevButton.textContent = 'Previous Page';
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    fetchData(currentPage);
+                }
+            });
+
+            // Next Page Button
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'Next Page';
+            nextButton.addEventListener('click', () => {
+                if (currentPage < lastPage) {
+                    currentPage++;
+                    fetchData(currentPage);
+                }
+            });
+
+            paginationContainer.innerHTML = '';
+            paginationContainer.appendChild(prevButton);
+            paginationContainer.appendChild(document.createTextNode(` Page ${currentPage} of ${lastPage} `));
+            paginationContainer.appendChild(nextButton);
+        }
+
+        // Fetch data for the initial page
+        fetchData(currentPage);
+    </script>
+
+</body>
+
+</html>

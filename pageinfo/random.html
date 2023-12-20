@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Information</title>
+
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        #anime-info {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        p {
+            color: #555;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <a href="anime.html" class="btn btn-outline-dark" style="position: absolute; top: 10px; left: 10px;">Search Anime</a>
+    <button class="btn btn-outline-dark" onclick="fetchAnimeInfo()">Get Random Anime Info</button>
+    <div id="anime-info"></div>
+
+    <script>
+        function fetchAnimeInfo() {
+            // Fetch data from the API
+            fetch('https://api.jikan.moe/v4/random/anime')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Process the data and generate HTML content
+                    const animeInfo = document.getElementById('anime-info');
+                    const anime = data?.data || {};
+
+                    // Fetch trailer link from the anime data
+                    const trailerLink = anime.trailer && anime.trailer.url
+                        ? `<a href="${anime.trailer.url}" target="_blank">Watch Trailer</a>`
+                        : 'Not Available';
+
+                    const htmlContent = `
+                        <h1>${anime.title ?? 'Unknown'}</h1>
+                        <img src="${anime.images?.jpg?.large_image_url ?? 'Unknown'}" alt="${anime.title ?? 'Unknown'} Poster">
+                        <p><strong>Type:</strong> ${anime.type ?? 'Unknown'}</p>
+                        <p><strong>Status:</strong> ${anime.status ?? 'Unknown'}</p>
+                        <p><strong>Episodes:</strong> ${anime.episodes ?? 'Unknown'}</p>
+                        <p><strong>Air Date:</strong> ${anime.aired?.string ?? 'Unknown'}</p>
+                        <p><strong>Duration:</strong> ${anime.duration ?? 'Unknown'}</p>
+                        <p><strong>Rating:</strong> ${anime.rating ?? 'Unknown'}</p>
+                        <p><strong>Score:</strong> ${anime.score ?? 'Unknown'}</p>
+                        <p><strong>Synopsis:</strong> ${anime.synopsis ?? 'Unknown'}</p>
+                        <p><strong>Genres:</strong> ${anime.genres?.map(genre => genre.name).join(', ') ?? 'Unknown'}</p>
+                        <p><strong>Producers:</strong> ${anime.producers?.map(producer => `<a href="${producer.url}">${producer.name}</a>`).join(', ') ?? 'Unknown'}</p>
+                        <p><strong>Licensors:</strong> ${anime.licensors?.map(licensor => `<a href="${licensor.url}">${licensor.name}</a>`).join(', ') ?? 'Unknown'}</p>
+                        <p><strong>Studios:</strong> ${anime.studios?.map(studio => `<a href="${studio.url}">${studio.name}</a>`).join(', ') ?? 'Unknown'}</p>
+                        <p><strong>Trailer:</strong> ${trailerLink}</p>
+                    `;
+
+                    // Update the HTML content
+                    animeInfo.innerHTML = htmlContent;
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+    </script>
+
+    <!-- Include Bootstrap JS and Popper.js (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

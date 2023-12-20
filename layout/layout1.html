@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>FAIZBP</title>
+	<link rel="stylesheet" href="layout1.css">
+</head>
+<body>
+	<a id="Button" href="../index.html" style="--clr:#1e9bff"><span>CHANGE DESIGN</span><i></i></a>
+	<ul>
+		<span id="marker"></span>
+		<li><a href="../pageinfo/mediasosial.html" target="blank">Media Sosial</a></li>
+		<li><a href="../pageinfo/anime.html" target="blank">ANIME</a></li>
+		<li><a href="https://www.sman10bekasi.sch.id/" target="blank">SEKOLAH</a></li>
+		<li><a href="../pageinfo/KALKULATOR.html" target="blank">KALKULATOR</a></li>
+		<li><a href="../pageinfo/about.html" target="blank">ABOUT ME</a></li>
+		<li><a href="../Web-Based3/index.html" target="blank">GAME</li>
+		<li><a href="../pageinfo/api.html" target="blank">GUDC</li>
+	</ul>
+	<script>
+		let marker = document.querySelector('#marker');
+		let item = document.querySelectorAll('ul li a');
+
+		function Indicator(e){
+			marker.style.top = e.offsetTop+'px';
+			marker.style.width = e.offsetWidth+'px';
+		}
+
+		item.forEach(link =>{
+			link.addEventListener('mousemove',(e) => {
+				Indicator(e.target);
+			})
+		})
+	</script>
+</body>
+</html>

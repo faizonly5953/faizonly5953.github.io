@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ABOUTME</title>
+    <link rel="stylesheet" type="text/css" href="../css/about.css">
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h2>About Me...</h2>
+            <p>
+                Nama lengkap saya Faiz Bagus Pradana. Biasanya dipanggil
+                Faiz. Lahir di Bekasi, 26 november 2008. untuk yang mau dateng ke rumah boleh nih &#128522, qr di bawah ya
+                <div class="png">
+<img src="../assets/qr.png" alt="QR" style="width:130px;height:130px;">
+            </div></p>
+        </div>
+        <div class="toggleBtn"></div>
+    </div>
+
+    <script>
+        let toggleBtn = document.querySelector('.toggleBtn');
+        let container = document.querySelector('.container');
+        toggleBtn.onclick = function(){
+            container.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
