@@ -457,12 +457,12 @@
       const FOOD_REDUCTION_RATE = 2;
       let lastReductionTime = 0;
 
-      const backgroundMusic = new Audio("/src/assets/UndertaleOST.mp3");
-      const collisionSound = new Audio("/src/assets/Explosion.wav");
-      const loseSound = new Audio("/src/assets/laugh.wav");
+      const backgroundMusic = new Audio("/assets/UndertaleOST.mp3");
+      const collisionSound = new Audio("/assets/Explosion.wav");
+      const loseSound = new Audio("/assets/laugh.wav");
 
       const createEatSound = () => {
-        const eatSound = new Audio("/src/assets/Eating.mp3");
+        const eatSound = new Audio("/assets/Eating.mp3");
         eatSound.volume = 0.7;
         eatSound.play();
       };
