@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Snake Game with AI and Leaderboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-dark: #0a0a1a;
+        --primary-color: #4caf50;
+        --secondary-color: #2196f3;
+        --text-color: #e0e0e0;
+        --accent-color: #ff5722;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Orbitron", sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        perspective: 1000px;
+      }
+
+      #menu {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(10, 10, 26, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        z-index: 10;
+        text-align: center;
+        backdrop-filter: blur(10px);
+      }
+
+      #orientation-disclaimer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(10, 10, 26, 0.95);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        text-align: center;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+      }
+
+      #orientation-disclaimer-content {
+        background: rgba(10, 10, 26, 0.9);
+        border: 2px solid var(--secondary-color);
+        border-radius: 10px;
+        padding: 30px;
+        max-width: 500px;
+        text-align: center;
+        box-shadow: 0 0 30px rgba(33, 150, 243, 0.3);
+      }
+
+      #orientation-disclaimer h2 {
+        color: var(--primary-color);
+        margin-bottom: 20px;
+        font-size: 2rem;
+        text-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+      }
+
+      #orientation-disclaimer p {
+        color: var(--text-color);
+        margin-bottom: 20px;
+        line-height: 1.6;
+      }
+
+      #close-disclaimer {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.5rem;
+        padding: 15px 40px;
+        background-color: var(--secondary-color);
+        color: var(--bg-dark);
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 15px rgba(33, 150, 243, 0.5);
+        transform: translateZ(30px);
+      }
+
+      #close-disclaimer:hover {
+        transform: translateZ(30px) scale(1.05);
+        box-shadow: 0 0 25px rgba(33, 150, 243, 0.7);
+      }
+
+      #menu h1 {
+        font-size: 4rem;
+        margin-bottom: 2rem;
+        color: var(--primary-color);
+        text-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+        transform: translateZ(50px);
+      }
+
+      #menu button {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.5rem;
+        padding: 15px 40px;
+        background-color: var(--primary-color);
+        color: var(--bg-dark);
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+        transform: translateZ(30px);
+      }
+
+      #menu button:hover {
+        background-color: var(--secondary-color);
+        transform: translateZ(30px) scale(1.05);
+        box-shadow: 0 0 25px rgba(33, 150, 243, 0.7);
+      }
+
+      #leaderboard {
+        position: absolute;
+        top: 230px;
+        right: 20px;
+        background: rgba(10, 10, 26, 0.7);
+        color: var(--text-color);
+        padding: 15px;
+        border-radius: 10px;
+        border: 2px solid var(--secondary-color);
+        font-size: 1.2rem;
+        backdrop-filter: blur(10px);
+        text-align: right;
+      }
+
+      #leaderboard span {
+        color: var(--accent-color);
+        font-weight: bold;
+      }
+
+      @media (max-width: 768px) {
+        #menu h1 {
+          font-size: 2.5rem;
+        }
+
+        #menu button {
+          font-size: 1.2rem;
+          padding: 12px 30px;
+        }
+
+        #leaderboard {
+          top: 10px;
+          right: 10px;
+          font-size: 1rem;
+        }
+
+        #orientation-disclaimer h2 {
+          font-size: 1.5rem;
+        }
+
+        #orientation-disclaimer p {
+          font-size: 0.9rem;
+        }
+
+        #close-disclaimer {
+          font-size: 1.2rem;
+          padding: 12px 30px;
+        }
+      }
+      :root {
+        --bg-dark: #0a0a1a;
+        --primary-color: #4caf50;
+        --secondary-color: #2196f3;
+        --text-color: #e0e0e0;
+        --accent-color: #ff5722;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Orbitron", sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        perspective: 1000px;
+      }
+
+      #menu {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(10, 10, 26, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        z-index: 10;
+        text-align: center;
+        backdrop-filter: blur(10px);
+      }
+
+      #game-config {
+        background: rgba(20, 20, 40, 0.8);
+        border: 2px solid var(--secondary-color);
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+        max-width: 500px;
+        width: 90%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      #game-config label {
+        color: var(--text-color);
+        margin-bottom: 5px;
+        text-align: left;
+      }
+
+      #game-config input,
+      #game-config select {
+        width: 100%;
+        padding: 10px;
+        background-color: var(--bg-dark);
+        color: var(--text-color);
+        border: 1px solid var(--secondary-color);
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="menu">
+      <h1>Snake Game</h1>
+      <div id="game-config">
+        <label for="ai-count">Jumlah Ular AI:</label>
+        <input type="number" id="ai-count" min="1" max="10" value="3" />
+
+        <label for="initial-player-length">Panjang Pemain Awal:</label>
+        <input
+          type="number"
+          id="initial-player-length"
+          min="10"
+          max="100"
+          value="50"
+        />
+
+        <label for="map-bounds">Batas Peta:</label>
+        <input
+          type="number"
+          id="map-bounds"
+          min="500"
+          max="5000"
+          value="2000"
+        />
+
+        <label for="food-spawn-interval"
+          >Interval Pemijahan Makanan (ms):</label
+        >
+        <input
+          type="number"
+          id="food-spawn-interval"
+          min="1000"
+          max="30000"
+          value="10000"
+        />
+
+        <label for="max-food-count">Jumlah Makanan Maksimum:</label>
+        <input
+          type="number"
+          id="max-food-count"
+          min="10"
+          max="2000"
+          value="1000"
+        />
+
+        <label for="player-color">Warna Pemain:</label>
+        <input type="color" id="player-color" value="#00ff00" />
+      </div>
+      <button onclick="startGame()">Play</button>
+    </div>
+    <div id="orientation-disclaimer">
+      <div id="orientation-disclaimer-content">
+        <h2>Game Recommendation</h2>
+        <p>
+          Untuk pengalaman bermain game terbaik, kami sarankan bermain dalam
+          mode desktop atau orientasi lanskap. Beberapa fitur mungkin terbatas
+          dalam mode potret.
+        </p>
+        <button id="close-disclaimer" onclick="closeDisclaimer()">
+          I Understand
+        </button>
+      </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+    <div id="leaderboard">Top Length: <span id="topScore">0</span></div>
+    <script>
+      function closeDisclaimer() {
+        document.getElementById("orientation-disclaimer").style.display =
+          "none";
+      }
+
+      function checkOrientation() {
+        const isPortrait = window.innerWidth < window.innerHeight;
+        const disclaimer = document.getElementById("orientation-disclaimer");
+
+        if (isPortrait) {
+          disclaimer.style.display = "flex";
+        } else {
+          disclaimer.style.display = "none";
+        }
+      }
+
+      function getGameConfig() {
+        return {
+          aiCount: parseInt(document.getElementById("ai-count").value),
+          initialPlayerLength: parseInt(
+            document.getElementById("initial-player-length").value
+          ),
+          mapBounds: parseInt(document.getElementById("map-bounds").value),
+          foodSpawnInterval: parseInt(
+            document.getElementById("food-spawn-interval").value
+          ),
+          maxFoodCount: parseInt(
+            document.getElementById("max-food-count").value
+          ),
+          playerColor: document.getElementById("player-color").value,
+          get aiColors() {
+            return Array.from({ length: this.aiCount }, () => {
+              let color;
+              do {
+                color = `#${Math.floor(Math.random() * 16777215)
+                  .toString(16)
+                  .padStart(6, "0")}`;
+              } while (isDarkColor(color));
+              return color;
+            });
+          },
+        };
+      }
+
+      // Check orientation when page loads and when device rotates
+      window.addEventListener("load", checkOrientation);
+      window.addEventListener("resize", checkOrientation);
+
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      let GAME_CONFIG = {};
+      let cameraX = 0,
+        cameraY = 0;
+      let mouseX = canvas.width / 2,
+        mouseY = canvas.height / 2;
+
+      // Customizable game settings
+      // Color utility function to check if a color is too dark
+      function isDarkColor(hexColor) {
+        // Remove the # if present
+        hexColor = hexColor.replace("#", "");
+
+        // Convert hex to RGB
+        const r = parseInt(hexColor.substr(0, 2), 16);
+        const g = parseInt(hexColor.substr(2, 2), 16);
+        const b = parseInt(hexColor.substr(4, 2), 16);
+
+        // Calculate luminance (perceived brightness)
+        // Using the standard luminance formula
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+        // Consider a color "dark" if its luminance is below 0.5
+        // You can adjust this threshold as needed
+        return luminance < 0.5;
+      }
+
+      // Replace the static GAME_CONFIG with a function to get dynamic configuration
+      function getGameConfig() {
+        return {
+          aiCount: parseInt(document.getElementById("ai-count").value),
+          initialPlayerLength: parseInt(
+            document.getElementById("initial-player-length").value
+          ),
+          initialAILength: 10, // You can also make this configurable if desired
+          mapBounds: parseInt(document.getElementById("map-bounds").value),
+          initialSpawnDistance: 10,
+          foodSpawnInterval: parseInt(
+            document.getElementById("food-spawn-interval").value
+          ),
+          maxFoodCount: parseInt(
+            document.getElementById("max-food-count").value
+          ),
+          playerColor: document.getElementById("player-color").value,
+
+          get aiColors() {
+            return Array.from({ length: this.aiCount }, () => {
+              let color;
+              do {
+                color = `#${Math.floor(Math.random() * 16777215)
+                  .toString(16)
+                  .padStart(6, "0")}`;
+              } while (isDarkColor(color));
+              return color;
+            });
+          },
+        };
+      }
+
+      let snake = [];
+      let aiSnakes = [];
+      let snakeLength = 10; // Default value
+      let foods = Array.from(
+        { length: Math.floor(GAME_CONFIG.mapBounds / 3) },
+        () => generateFood()
+      );
+      let topScore = 0,
+        gameOver = false;
+      let lastDeathPositions = {
+        player: null,
+        aiSnakes: [],
+      };
+      // New variables for periodic food spawning
+      let lastFoodSpawnTime = performance.now();
+      const MAX_FOOD_COUNT = 100; // Prevent unlimited food spawning
+
+      let speedBoostActive = false;
+      const MINIMUM_SNAKE_LENGTH = 2;
+      const SNAKE_LENGTH_REDUCTION_RATE = 2;
+      const FOOD_REDUCTION_RATE = 2;
+      let lastReductionTime = 0;
+
+      const backgroundMusic = new Audio("/src/assets/UndertaleOST.mp3");
+      const collisionSound = new Audio("/src/assets/Explosion.wav");
+      const loseSound = new Audio("/src/assets/laugh.wav");
+
+      const createEatSound = () => {
+        const eatSound = new Audio("/src/assets/Eating.mp3");
+        eatSound.volume = 0.7;
+        eatSound.play();
+      };
+
+      backgroundMusic.volume = 0.3;
+      backgroundMusic.loop = true;
+      collisionSound.volume = 0.6;
+      loseSound.volume = 0.6;
+
+      function manageFoodCount() {
+        // If food count exceeds maximum, remove the oldest foods
+        if (foods.length > GAME_CONFIG.maxFoodCount) {
+          // Sort foods by spawn time and remove the oldest ones
+          foods.sort((a, b) => a.spawnTime - b.spawnTime);
+          foods = foods.slice(foods.length - GAME_CONFIG.maxFoodCount);
+        }
+      }
+
+      // Function to get random mode probabilities for an AI snake
+      function generateModeProbabilities() {
+        const modes = ["defensive", "aggressive", "neutral"];
+        const probabilities = modes.map(() => Math.random());
+        const total = probabilities.reduce((sum, prob) => sum + prob, 0);
+
+        return modes.map((mode, index) => ({
+          mode,
+          probability: probabilities[index] / total,
+        }));
+      }
+
+      // Function to select a mode based on probabilities
+      function selectMode(modeProbabilities) {
+        const randomValue = Math.random();
+        let cumulativeProbability = 0;
+
+        for (const modeProb of modeProbabilities) {
+          cumulativeProbability += modeProb.probability;
+          if (randomValue <= cumulativeProbability) {
+            return modeProb.mode;
+          }
+        }
+
+        return "neutral"; // Fallback
+      }
+
+      function getRandomSpawnPosition() {
+        const halfBounds = GAME_CONFIG.mapBounds / 2;
+        return {
+          x: (Math.random() - 0.5) * GAME_CONFIG.mapBounds,
+          y: (Math.random() - 0.5) * GAME_CONFIG.mapBounds,
+        };
+      }
+
+      function initializeAISnakes(isRespawn = false) {
+        aiSnakes = GAME_CONFIG.aiColors
+          .slice(0, GAME_CONFIG.aiCount)
+          .map((color, index) => {
+            let spawnPosition;
+
+            if (isRespawn && lastDeathPositions.aiSnakes[index]) {
+              // Use offset spawning if death position exists
+              const deathPos = lastDeathPositions.aiSnakes[index];
+              spawnPosition = {
+                x: deathPos.x + (index + 1) * GAME_CONFIG.initialSpawnDistance,
+                y: deathPos.y + (index + 1) * GAME_CONFIG.initialSpawnDistance,
+              };
+            } else {
+              // Random spawning for initial game start or if no death position
+              spawnPosition = getRandomSpawnPosition();
+            }
+
+            return {
+              snake: [
+                {
+                  x: spawnPosition.x,
+                  y: spawnPosition.y,
+                },
+              ],
+              color: color,
+              length: GAME_CONFIG.initialAILength,
+              modeProbabilities: generateModeProbabilities(),
+              currentMode: null,
+            };
+          });
+      }
+
+      function generateFood() {
+        return {
+          x: (Math.random() - 0.5) * GAME_CONFIG.mapBounds,
+          y: (Math.random() - 0.5) * GAME_CONFIG.mapBounds,
+          size: 7,
+          color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+          spawnTime: performance.now(), // Optional: track when food was spawned
+        };
+      }
+
+      document.addEventListener("mousemove", (event) => {
+        mouseX = event.clientX;
+        mouseY = event.clientY;
+      });
+
+      canvas.addEventListener("mousedown", (event) => {
+        if (snakeLength > MINIMUM_SNAKE_LENGTH) {
+          speedBoostActive = true;
+        }
+      });
+
+      canvas.addEventListener("mouseup", () => {
+        speedBoostActive = false;
+      });
+
+      canvas.addEventListener("mouseleave", () => {
+        speedBoostActive = false;
+      });
+
+      function findClosestFood(head, excludedFoods = []) {
+        // Filter out foods that are already targeted or have zero size
+        let availableFoods = foods.filter(
+          (food) => food.size > 0 && !excludedFoods.includes(food)
+        );
+
+        if (availableFoods.length === 0) return null;
+
+        // Find the closest food, taking into account the distance and potential competition
+        return availableFoods.reduce((closest, food) => {
+          const distanceToFood = Math.hypot(food.x - head.x, food.y - head.y);
+          const closestDistance = Math.hypot(
+            closest.x - head.x,
+            closest.y - head.y
+          );
+
+          // Additional logic to make food selection more strategic
+          const foodCompetitionFactor = aiSnakes.reduce(
+            (competition, aiData) => {
+              if (aiData.snake[0] === head) return competition;
+
+              const aiDistanceToFood = Math.hypot(
+                food.x - aiData.snake[0].x,
+                food.y - aiData.snake[0].y
+              );
+              const aiDistanceToClosest = Math.hypot(
+                closest.x - aiData.snake[0].x,
+                closest.y - aiData.snake[0].y
+              );
+
+              // If another AI snake is closer to this food, increase competition factor
+              return aiDistanceToFood < distanceToFood
+                ? competition + 1
+                : competition;
+            },
+            0
+          );
+
+          // Combine distance and competition factors
+          const currentFoodScore = distanceToFood + foodCompetitionFactor * 50;
+          const closestFoodScore = closestDistance + foodCompetitionFactor * 50;
+
+          return currentFoodScore < closestFoodScore ? food : closest;
+        }, availableFoods[0]);
+      }
+
+      // Modify the AI snake movement to track targeted foods
+      let targetedFoods = new Set();
+
+      // Rest of the code remains the same until the AI movement part
+      function moveSnake(snakeArray, isPlayer, aiData = null) {
+        let head = snakeArray[0];
+        let targetFood = null;
+        let targetX, targetY;
+        let speedBoost = false;
+
+        if (!isPlayer) {
+          // Dynamically select AI mode based on probabilities if not already set
+          if (!aiData.currentMode) {
+            aiData.currentMode = selectMode(aiData.modeProbabilities);
+          }
+
+          // Determine AI snake's state based on the selected mode
+          const determineAIState = () => {
+            const aiLength = aiData.snake.length;
+            const otherSnakes = aiSnakes.filter((other) => other !== aiData);
+
+            // Mode-specific logic
+            switch (aiData.currentMode) {
+              case "defensive":
+                // Defensive logic: Seek safe areas and avoid larger snakes
+                const dominantSnakes = otherSnakes.filter(
+                  (other) => other.snake.length > aiLength * 1.5
+                );
+
+                const calculateEscapeRoutes = () => {
+                  const mapBounds = GAME_CONFIG.mapBounds;
+                  const currentPos = aiData.snake[0];
+                  const escapeDirections = [
+                    { x: currentPos.x + mapBounds, y: currentPos.y },
+                    { x: currentPos.x - mapBounds, y: currentPos.y },
+                    { x: currentPos.x, y: currentPos.y + mapBounds },
+                    { x: currentPos.x, y: currentPos.y - mapBounds },
+                  ];
+
+                  return escapeDirections.filter(
+                    (escape) =>
+                      !otherSnakes.some(
+                        (other) =>
+                          Math.hypot(
+                            other.snake[0].x - escape.x,
+                            other.snake[0].y - escape.y
+                          ) <
+                          mapBounds / 2
+                      )
+                  );
+                };
+
+                if (dominantSnakes.length > 0) {
+                  const escapeRoutes = calculateEscapeRoutes();
+                  if (escapeRoutes.length > 0) {
+                    return {
+                      mode: "defensive",
+                      target: escapeRoutes[0],
+                      speedBoost: true,
+                    };
+                  }
+                }
+                break;
+
+              case "aggressive":
+                // Aggressive logic: Target and block smaller snakes
+                const smallerSnakes = otherSnakes.filter(
+                  (other) =>
+                    other.snake.length < aiLength &&
+                    Math.hypot(
+                      other.snake[0].x - head.x,
+                      other.snake[0].y - head.y
+                    ) < 500
+                );
+
+                if (smallerSnakes.length > 0) {
+                  const target = smallerSnakes.reduce((closest, current) => {
+                    const currentDistance = Math.hypot(
+                      current.snake[0].x - head.x,
+                      current.snake[0].y - head.y
+                    );
+                    const closestDistance = Math.hypot(
+                      closest.snake[0].x - head.x,
+                      closest.snake[0].y - head.y
+                    );
+                    return currentDistance < closestDistance
+                      ? current
+                      : closest;
+                  });
+
+                  return {
+                    mode: "aggressive",
+                    target: target.snake[0],
+                    speedBoost: true,
+                  };
+                }
+                break;
+
+              default: // Neutral mode
+                break;
+            }
+
+            // Neutral mode: food targeting
+            targetedFoods.delete(aiData.currentTargetFood);
+            targetFood = findClosestFood(head, Array.from(targetedFoods));
+
+            if (targetFood) {
+              targetedFoods.add(targetFood);
+              aiData.currentTargetFood = targetFood;
+
+              let predictionFactor = 0.5;
+              let randomOffset = (Math.random() - 0.5) * 50;
+              targetX = targetFood.x + randomOffset * predictionFactor;
+              targetY = targetFood.y + randomOffset * predictionFactor;
+            } else {
+              // Wandering behavior if no food found
+              targetX = head.x + Math.cos(performance.now() * 0.001) * 100;
+              targetY = head.y + Math.sin(performance.now() * 0.001) * 100;
+            }
+
+            return {
+              mode: "neutral",
+              target: null,
+              speedBoost: false,
+            };
+          };
+
+          const aiState = determineAIState();
+
+          switch (aiState.mode) {
+            case "defensive":
+              targetX = aiState.target.x;
+              targetY = aiState.target.y;
+              speedBoost = aiState.speedBoost;
+              break;
+
+            case "aggressive":
+              // Attempt to block or trap smaller snake
+              const blockingVector = {
+                x: (aiState.target.x - head.x) * 1.5,
+                y: (aiState.target.y - head.y) * 1.5,
+              };
+              targetX = head.x + blockingVector.x;
+              targetY = head.y + blockingVector.y;
+              speedBoost = aiState.speedBoost;
+              break;
+
+            default: // Neutral mode
+              // Remove previously targeted foods
+              targetedFoods.delete(aiData.currentTargetFood);
+
+              // Find the closest available food
+              targetFood = findClosestFood(head, Array.from(targetedFoods));
+
+              if (targetFood) {
+                targetedFoods.add(targetFood);
+                aiData.currentTargetFood = targetFood;
+
+                // Add prediction and randomness to food targeting
+                let predictionFactor = 0.5;
+                let randomOffset = (Math.random() - 0.5) * 50;
+                targetX = targetFood.x + randomOffset * predictionFactor;
+                targetY = targetFood.y + randomOffset * predictionFactor;
+              } else {
+                // Wandering behavior if no food found
+                targetX = head.x + Math.cos(performance.now() * 0.001) * 100;
+                targetY = head.y + Math.sin(performance.now() * 0.001) * 100;
+              }
+              break;
+          }
+
+          // Boundary restriction for AI
+          const halfBounds = GAME_CONFIG.mapBounds / 2;
+          targetX = Math.max(-halfBounds, Math.min(halfBounds, targetX));
+          targetY = Math.max(-halfBounds, Math.min(halfBounds, targetY));
+        } else {
+          // Player targeting
+          targetX = mouseX - canvas.width / 2 + head.x;
+          targetY = mouseY - canvas.height / 2 + head.y;
+
+          // Restrict player movement to map bounds
+          const halfBounds = GAME_CONFIG.mapBounds / 2;
+          targetX = Math.max(-halfBounds, Math.min(halfBounds, targetX));
+          targetY = Math.max(-halfBounds, Math.min(halfBounds, targetY));
+        }
+
+        // Calculate angle to target
+        let angle = Math.atan2(targetY - head.y, targetX - head.x);
+
+        // Speed and movement calculations
+        let currentSpeed = 3;
+        let speedMultiplier =
+          (isPlayer && speedBoostActive) || speedBoost ? 2 : 1;
+
+        // AI movement smoothing
+        let smoothingFactor = isPlayer ? 1 : 0.7;
+
+        // Create new head position
+        let newHead = {
+          x:
+            head.x +
+            Math.cos(angle) * currentSpeed * speedMultiplier * smoothingFactor,
+          y:
+            head.y +
+            Math.sin(angle) * currentSpeed * speedMultiplier * smoothingFactor,
+        };
+
+        // Add new head to snake
+        snakeArray.unshift(newHead);
+
+        // Trim snake length
+        if (
+          snakeArray.length >
+          (isPlayer ? snakeLength : aiData ? aiData.length : 10)
+        ) {
+          snakeArray.pop();
+        }
+      }
+
+      function checkFoodCollision(snakeArray, isPlayer, aiData = null) {
+        let currentTime = performance.now();
+        let foodReduced = false;
+
+        foods.forEach((food, index) => {
+          if (
+            Math.hypot(snakeArray[0].x - food.x, snakeArray[0].y - food.y) <
+            food.size + 10
+          ) {
+            if (isPlayer) {
+              if (currentTime - lastReductionTime >= 100) {
+                snakeLength += 5;
+                lastReductionTime = currentTime;
+                foodReduced = true;
+                createEatSound();
+              }
+            } else {
+              if (aiData) aiData.length += 5;
+              foodReduced = true;
+            }
+
+            if (foodReduced) {
+              foods[index] = generateFood();
+            }
+          }
+        });
+
+        if (isPlayer) {
+          topScore = Math.max(topScore, snakeLength);
+          document.getElementById("topScore").innerText = topScore;
+        }
+      }
+
+      function checkCollision() {
+        let playerHead = snake[0];
+
+        // Check collision with each AI snake
+        aiSnakes.forEach((aiData, index) => {
+          let aiHead = aiData.snake[0];
+
+          // Direct head collision with player
+          if (
+            Math.hypot(playerHead.x - aiHead.x, playerHead.y - aiHead.y) < 10
+          ) {
+            gameOver = true;
+            backgroundMusic.pause();
+            loseSound.play();
+            showGameOverScreen("Tabrakan langsung! Kedua Ular kalah.");
+            convertToFood(snake);
+            convertToFood(aiData.snake);
+            return;
+          }
+
+          // Player head colliding with AI snake's body
+          for (let i = 1; i < aiData.snake.length; i++) {
+            if (
+              Math.hypot(
+                playerHead.x - aiData.snake[i].x,
+                playerHead.y - aiData.snake[i].y
+              ) < 10
+            ) {
+              gameOver = true;
+              backgroundMusic.pause();
+              loseSound.play();
+              showGameOverScreen(
+                "Anda bertabrakan dengan tubuh ular Lain! Anda kalah."
+              );
+              convertToFood(snake);
+              return;
+            }
+          }
+
+          // AI head colliding with player's body
+          for (let i = 1; i < snake.length; i++) {
+            if (Math.hypot(aiHead.x - snake[i].x, aiHead.y - snake[i].y) < 10) {
+              backgroundMusic.pause();
+              collisionSound.play();
+              convertToFood(aiData.snake);
+
+              // Reset specific AI snake
+              aiData.snake = [{ x: 200 + index * 100, y: 200 + index * 100 }];
+              aiData.length = GAME_CONFIG.initialAILength;
+              backgroundMusic.play();
+
+              return;
+            }
+          }
+
+          // Check collisions between AI snakes
+          aiSnakes.forEach((otherAiData, otherIndex) => {
+            if (aiData === otherAiData) return; // Skip self
+
+            let otherAiHead = otherAiData.snake[0];
+
+            // Direct head-to-head collision between AI snakes
+            if (
+              Math.hypot(aiHead.x - otherAiHead.x, aiHead.y - otherAiHead.y) <
+              10
+            ) {
+              backgroundMusic.pause();
+              collisionSound.play();
+
+              // Convert both snakes to food
+              convertToFood(aiData.snake);
+              convertToFood(otherAiData.snake);
+
+              // Reset both AI snakes
+              aiData.snake = [{ x: 200 + index * 100, y: 200 + index * 100 }];
+              aiData.length = GAME_CONFIG.initialAILength;
+
+              otherAiData.snake = [
+                { x: 200 + otherIndex * 100, y: 200 + otherIndex * 100 },
+              ];
+              otherAiData.length = GAME_CONFIG.initialAILength;
+
+              backgroundMusic.play();
+
+              return;
+            }
+
+            // Check AI snake's head colliding with other AI snake's body
+            for (let i = 1; i < otherAiData.snake.length; i++) {
+              if (
+                Math.hypot(
+                  aiHead.x - otherAiData.snake[i].x,
+                  aiHead.y - otherAiData.snake[i].y
+                ) < 10
+              ) {
+                backgroundMusic.pause();
+                collisionSound.play();
+
+                // Convert attacking snake to food
+                convertToFood(aiData.snake);
+
+                // Reset attacking AI snake
+                aiData.snake = [{ x: 200 + index * 100, y: 200 + index * 100 }];
+                aiData.length = GAME_CONFIG.initialAILength;
+
+                backgroundMusic.play();
+
+                return;
+              }
+            }
+          });
+        });
+      }
+
+      function convertToFood(snakeArray) {
+        snakeArray.forEach((segment) => {
+          // Only add food if we're below the max limit
+          if (foods.length < GAME_CONFIG.maxFoodCount) {
+            foods.push({
+              x: segment.x,
+              y: segment.y,
+              size: 7,
+              color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+              spawnTime: performance.now(), // Add spawn time for tracking
+            });
+          }
+        });
+
+        // Manage food count after converting snake to food
+        manageFoodCount();
+      }
+
+      function update() {
+        if (gameOver) return;
+
+        let currentTime = performance.now();
+
+        // Periodic food spawning mechanism
+        if (currentTime - lastFoodSpawnTime >= GAME_CONFIG.foodSpawnInterval) {
+          // Only spawn food if we haven't reached the maximum food count
+          if (foods.length < MAX_FOOD_COUNT) {
+            foods.push(generateFood());
+            lastFoodSpawnTime = currentTime;
+          }
+        }
+
+        if (speedBoostActive) {
+          if (currentTime - lastReductionTime >= 100) {
+            while (snake.length > snakeLength) {
+              snake.pop();
+            }
+
+            if (snakeLength > MINIMUM_SNAKE_LENGTH) {
+              snakeLength = Math.max(
+                MINIMUM_SNAKE_LENGTH,
+                snakeLength - SNAKE_LENGTH_REDUCTION_RATE
+              );
+              lastReductionTime = currentTime;
+            } else {
+              speedBoostActive = false;
+            }
+          }
+        }
+
+        moveSnake(snake, true);
+
+        // Move each AI snake
+        aiSnakes.forEach((aiData) => {
+          moveSnake(aiData.snake, false, aiData);
+        });
+
+        checkFoodCollision(snake, true);
+
+        // Check food collision for each AI snake
+        aiSnakes.forEach((aiData) => {
+          checkFoodCollision(aiData.snake, false, aiData);
+        });
+
+        checkCollision();
+
+        cameraX = -snake[0].x + canvas.width / 2;
+        cameraY = -snake[0].y + canvas.height / 2;
+
+        manageFoodCount();
+      }
+
+      function drawSnake(snakeArray, color) {
+        snakeArray.forEach((segment, index) => {
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(
+            segment.x,
+            segment.y,
+            10 - (index / snakeArray.length) * 5,
+            0,
+            Math.PI * 2
+          );
+          ctx.fill();
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(cameraX, cameraY);
+
+        foods.forEach((food) => {
+          ctx.fillStyle = food.color;
+          ctx.beginPath();
+          ctx.arc(food.x, food.y, food.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Draw player snake
+        drawSnake(snake, GAME_CONFIG.playerColor);
+
+        // Draw each AI snake with its color
+        aiSnakes.forEach((aiData) => {
+          drawSnake(aiData.snake, aiData.color);
+        });
+
+        // Restore context before drawing indicators and minimap
+        ctx.restore();
+
+        // Draw snake length indicator in screen coordinates (not translated)
+        ctx.fillStyle = "white";
+        ctx.font = "20px Arial";
+        ctx.fillText(`Snake Length: ${snakeLength}`, 10, 30);
+
+        // Draw minimap
+        drawMinimap();
+      }
+
+      function showGameOverScreen(message) {
+        // Nonaktifkan musik dan suara saat game over
+        backgroundMusic.pause();
+
+        const gameOverDiv = document.createElement("div");
+        gameOverDiv.id = "gameOverScreen"; // Tambahkan ID untuk memudahkan penghapusan
+        gameOverDiv.innerHTML = `
+        <div style="
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(10, 10, 26, 0.9); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 1000;
+            font-family: 'Orbitron', sans-serif;
+            backdrop-filter: blur(10px);
+        ">
+            <h1 style="
+                color: #4CAF50; 
+                margin-bottom: 30px; 
+                font-size: 3rem; 
+                text-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+                text-align: center;
+                padding: 0 20px;
+            ">${message}</h1>
+            <button id="restartButton" style="
+                padding: 15px 40px; 
+                font-size: 1.5rem; 
+                background-color: #4CAF50; 
+                color: #0a0a1a; 
+                border: none; 
+                border-radius: 10px; 
+                cursor: pointer;
+                font-family: 'Orbitron', sans-serif;
+                transition: all 0.3s ease;
+                box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+                transform: translateZ(30px);
+            ">
+                Restart Game
+            </button>
+        </div>
+    `;
+        document.body.appendChild(gameOverDiv);
+
+        const restartButton = document.getElementById("restartButton");
+        restartButton.addEventListener("click", restartGame);
+      }
+
+      function restartGame() {
+        console.log("Game Restarting");
+
+        // Remove game over screen
+        const gameOverScreen = document.getElementById("gameOverScreen");
+        if (gameOverScreen) {
+          document.body.removeChild(gameOverScreen);
+        }
+
+        // Reset ALL game-related variables
+        GAME_CONFIG = getGameConfig();
+        console.log("GAME_CONFIG:", GAME_CONFIG);
+
+        // Reset snake dengan posisi acak dan panjang sesuai konfigurasi
+        snake = [
+          {
+            x: (Math.random() - 0.5) * GAME_CONFIG.mapBounds,
+            y: (Math.random() - 0.5) * GAME_CONFIG.mapBounds,
+          },
+        ];
+        snakeLength = GAME_CONFIG.initialPlayerLength;
+
+        // Reset additional game state variables
+        aiSnakes = [];
+        foods = [];
+        gameOver = false;
+        lastReductionTime = 0;
+        speedBoostActive = false;
+        targetedFoods.clear(); // Clear the set of targeted foods
+        lastFoodSpawnTime = performance.now(); // Reset food spawn timer
+
+        // Reset camera position
+        cameraX = 0;
+        cameraY = 0;
+
+        // Reset mouse position
+        mouseX = canvas.width / 2;
+        mouseY = canvas.height / 2;
+
+        // Initialize AI snakes
+        initializeAISnakes(false);
+
+        // Generate initial food
+        foods = Array.from(
+          { length: Math.floor(GAME_CONFIG.mapBounds / 3) },
+          () => generateFood()
+        );
+
+        // Reset dan play music
+        backgroundMusic.currentTime = 0;
+        backgroundMusic.play();
+
+        // Start game loop
+        gameLoop();
+      }
+
+      function drawMinimap() {
+        const minimapSize = 200;
+        const minimapPadding = 20;
+        const mapScale = minimapSize / GAME_CONFIG.mapBounds;
+
+        // Minimap background
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+        ctx.fillRect(
+          canvas.width - minimapSize - minimapPadding,
+          minimapPadding,
+          minimapSize,
+          minimapSize
+        );
+
+        // Minimap border
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(
+          canvas.width - minimapSize - minimapPadding,
+          minimapPadding,
+          minimapSize,
+          minimapSize
+        );
+
+        // Draw map bounds
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+        ctx.strokeRect(
+          canvas.width -
+            minimapSize -
+            minimapPadding +
+            minimapSize / 2 -
+            (minimapSize / 2) * mapScale,
+          minimapPadding + minimapSize / 2 - (minimapSize / 2) * mapScale,
+          minimapSize * mapScale,
+          minimapSize * mapScale
+        );
+
+        // Draw player on minimap
+        ctx.fillStyle = GAME_CONFIG.playerColor;
+        ctx.beginPath();
+        ctx.arc(
+          canvas.width -
+            minimapSize -
+            minimapPadding +
+            (snake[0].x + GAME_CONFIG.mapBounds / 2) * mapScale,
+          minimapPadding + (snake[0].y + GAME_CONFIG.mapBounds / 2) * mapScale,
+          5,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+
+        // Draw AI snakes on minimap
+        aiSnakes.forEach((aiData, index) => {
+          ctx.fillStyle = aiData.color;
+          ctx.beginPath();
+          ctx.arc(
+            canvas.width -
+              minimapSize -
+              minimapPadding +
+              (aiData.snake[0].x + GAME_CONFIG.mapBounds / 2) * mapScale,
+            minimapPadding +
+              (aiData.snake[0].y + GAME_CONFIG.mapBounds / 2) * mapScale,
+            4,
+            0,
+            Math.PI * 2
+          );
+          ctx.fill();
+        });
+
+        // Draw foods on minimap
+        foods.forEach((food) => {
+          ctx.fillStyle = food.color;
+          ctx.beginPath();
+          ctx.arc(
+            canvas.width -
+              minimapSize -
+              minimapPadding +
+              (food.x + GAME_CONFIG.mapBounds / 2) * mapScale,
+            minimapPadding + (food.y + GAME_CONFIG.mapBounds / 2) * mapScale,
+            0.2, // 10x smaller than the original size of 2
+            0,
+            Math.PI * 2
+          );
+          ctx.fill();
+        });
+      }
+
+      function gameLoop() {
+        // Tambahkan parameter time untuk kontrol frame rate
+        let lastTime = 0;
+        const targetFPS = 60; // Target frame rate
+        const frameTime = 1000 / targetFPS;
+
+        function animate(currentTime) {
+          // Hitung selisih waktu antara frame sekarang dan terakhir
+          const deltaTime = currentTime - lastTime;
+
+          // Hanya update dan draw jika sudah waktunya
+          if (deltaTime >= frameTime) {
+            update();
+            draw();
+            lastTime = currentTime - (deltaTime % frameTime);
+          }
+
+          // Lanjutkan loop animasi hanya jika game belum berakhir
+          if (!gameOver) {
+            requestAnimationFrame(animate);
+          }
+        }
+
+        // Mulai loop animasi
+        requestAnimationFrame(animate);
+      }
+
+      function startGame() {
+        console.log("Start Game called");
+
+        // Sembunyikan menu
+        document.getElementById("menu").style.display = "none";
+
+        // Dapatkan konfigurasi game terbaru
+        GAME_CONFIG = getGameConfig();
+        console.log("GAME_CONFIG:", GAME_CONFIG);
+
+        // Reset snake dengan posisi acak dan panjang sesuai konfigurasi
+        snake = [
+          {
+            x: (Math.random() - 0.5) * GAME_CONFIG.mapBounds,
+            y: (Math.random() - 0.5) * GAME_CONFIG.mapBounds,
+          },
+        ];
+        snakeLength = GAME_CONFIG.initialPlayerLength;
+
+        // Inisialisasi ulang AI snake
+        initializeAISnakes(false);
+
+        // Hasilkan makanan baru
+        foods = Array.from(
+          { length: Math.floor(GAME_CONFIG.mapBounds / 3) },
+          () => generateFood()
+        );
+
+        gameOver = false;
+
+        // Reset dan mainkan musik
+        backgroundMusic.currentTime = 0;
+        backgroundMusic.play();
+
+        // Mulai game loop
+        gameLoop();
+      }
+    </script>
+  </body>
+</html>
